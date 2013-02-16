@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html><head>
+
+<script type="text/javascript">
+
+function Info(){
+    this.info = new Array;
+}
+Info.prototype.write = function(ctx, text){
+    ctx.fillStyle = "rgba(255, 255, 255, 1)";
+    ctx.fillRect(0, 0, 300, 300);
+    ctx.fillStyle = "blue";
+    ctx.font = "bold 16px Arial";
+    ctx.fillText(text, 20, 20);
+}
+
+function CanvasState(canvas){
+    this.ctx = canvas.getContext('2d');
+    this.valid = true;
+    var myState = this;
+    myState.info = new Info();
+    myState.info.write(this.ctx,"Hello there");
+        canvas.addEventListener('mousedown', function() {
+            myState.ctx.fillStyle = "rgba(0, 0, 255, .5)";
+            myState.ctx.fillRect(0, 0, 300, 300);
+        }, true);
+        canvas.addEventListener('mouseup', function() {
+            myState.ctx.fillStyle = "rgba(255, 255, 255, 1)";
+            myState.ctx.fillRect(0, 0, 300, 300);
+        }, true);
+        canvas.addEventListener('mousemove', function(e) {
+            // we'll need to put some code in here.
+            var mouse = myState.getMousePos(canvas,e);
+            myState.info.write(myState.ctx, "Mouse Position: (x,y) " +  mouse.x + " " + mouse.y);
+        }, true);
+        canvas.addEventListener('click', function(e) {
+            // we'll need to put some code in here.
+            var mouse = myState.getMousePos(canvas,e);
+            myState.info.write(myState.ctx, "mouse click at " +  mouse.x + " " + mouse.y);
+            
+        }, true);
+}
+
+CanvasState.prototype.getMousePos = function(canvas,evt){
+    var rect = canvas.getBoundingClientRect();
+    var xm = evt.clientX - rect.left;
+    var ym = evt.clientY - rect.top;
+    return {
+        x: xm,
+        y: ym
+    };  
+}
+
+function init()
+{
+    var s = new CanvasState(document.getElementById('canvas1'));
+    document.getElementById('canvas1').focus()
+
+}
+</script>
+
+<style>
+canvas {border-style:solid;}
+</style>    
+</head>
+
+<body onload="init()">
+        <canvas tabindex=1 id="canvas1" width="300" height="300" fillStyle border-style></canvas>
+    </body>
+</html>
