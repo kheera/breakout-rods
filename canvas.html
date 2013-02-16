@@ -39,6 +39,13 @@ function CanvasState(canvas){
             myState.info.write(myState.ctx, "mouse click at " +  mouse.x + " " + mouse.y);
             
         }, true);
+        canvas.addEventListener('click', function(e) {
+            // we'll need to put some code in here.
+            var mouse = myState.getMousePos(canvas,e);
+            myState.info.write(myState.ctx, "mouse click at " +  mouse.x + " " + mouse.y);
+        }, true);
+        
+        
 }
 
 CanvasState.prototype.getMousePos = function(canvas,evt){
@@ -49,6 +56,15 @@ CanvasState.prototype.getMousePos = function(canvas,evt){
         x: xm,
         y: ym
     };  
+}
+	
+// Block constructor.
+function Block () {
+    // initialization code goes here.
+}
+
+Block.prototype.draw = function(ctx){
+// the code that draws the block goes in here.
 }
 
 function init()
