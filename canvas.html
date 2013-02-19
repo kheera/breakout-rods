@@ -8,7 +8,7 @@ function Info(){
 }
 Info.prototype.write = function(ctx, text){
     ctx.fillStyle = "rgba(255, 255, 255, 1)";
-    ctx.fillRect(0, 0, 300, 300);
+    ctx.fillRect(0, 0, 250, 25);
     ctx.fillStyle = "blue";
     ctx.font = "bold 16px Arial";
     ctx.fillText(text, 20, 20);
@@ -17,37 +17,45 @@ Info.prototype.write = function(ctx, text){
 function CanvasState(canvas){
     this.ctx = canvas.getContext('2d');
     this.valid = true;
-    var myState = this;
+    var myState = this;  // use myState instead of this for the rest of this function...
+    myState.block = null;
     myState.info = new Info();
     myState.info.write(this.ctx,"Hello there");
         canvas.addEventListener('mousedown', function() {
+            /*
             myState.ctx.fillStyle = "rgba(0, 0, 255, .5)";
-            myState.ctx.fillRect(0, 0, 300, 300);
+            myState.ctx.fillRect(0, 0, 300, 300); */
         }, true);
         canvas.addEventListener('mouseup', function() {
-            myState.ctx.fillStyle = "rgba(255, 255, 255, 1)";
-            myState.ctx.fillRect(0, 0, 300, 300);
+           /* myState.ctx.fillStyle = "rgba(255, 255, 255, 1)";
+            myState.ctx.fillRect(0, 0, 300, 300);*/
         }, true);
         canvas.addEventListener('mousemove', function(e) {
-            // we'll need to put some code in here.
             var mouse = myState.getMousePos(canvas,e);
             myState.info.write(myState.ctx, "Mouse Position: (x,y) " +  mouse.x + " " + mouse.y);
         }, true);
         canvas.addEventListener('click', function(e) {
-            // we'll need to put some code in here.
             var mouse = myState.getMousePos(canvas,e);
             myState.info.write(myState.ctx, "mouse click at " +  mouse.x + " " + mouse.y);
-            
+            myState.block = new Block(mouse.x, mouse.y, 20, 20, "rgba(0, 0, 0, 1)");
+            myState.valid = false;
         }, true);
-        canvas.addEventListener('click', function(e) {
-            // we'll need to put some code in here.
-            var mouse = myState.getMousePos(canvas,e);
-            myState.info.write(myState.ctx, "mouse click at " +  mouse.x + " " + mouse.y);
-        }, true);
-        
-        
+        // and call the function every few seconds
+        setInterval(function() { myState.draw(); }, 30); // calls myState.draw() every 100 milliseconds
+
 }
 
+// after adding the block code we can see an interesting problem.... every time we move the mouse
+// the the block disappears!  TO fix this we're going to put all our redrawing code into a canvas.draw()
+// method and have it called automatically a bunch of times per second.
+CanvasState.prototype.draw = function ()
+{
+    if (this.valid === false)
+    {
+        this.block.draw(this.ctx);
+        this.valid = true;
+    }
+}
 CanvasState.prototype.getMousePos = function(canvas,evt){
     var rect = canvas.getBoundingClientRect();
     var xm = evt.clientX - rect.left;
@@ -59,19 +67,30 @@ CanvasState.prototype.getMousePos = function(canvas,evt){
 }
 	
 // Block constructor.
-function Block () {
+// (x,y) coordinates refer to the top left corner of the block.
+// colour should be valid rgb colour code
+function Block (x,y,width, height, colour) {
     // initialization code goes here.
+    // TODO: Add verification to block constructor to make sure we have valid information for building our block with.
+    this.x = x;
+    this.y = y;
+    this.height = height;
+    this.width = width;
+    this.colour = colour;
 }
 
 Block.prototype.draw = function(ctx){
-// the code that draws the block goes in here.
+    // the code that draws the block goes in here.
+    // we need to define a rectangle and draw it
+    ctx.fillStyle = this.colour;
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+  //  alert(this.x);
 }
 
 function init()
 {
     var s = new CanvasState(document.getElementById('canvas1'));
-    document.getElementById('canvas1').focus()
-
+    document.getElementById('canvas1').focus();
 }
 </script>
 
