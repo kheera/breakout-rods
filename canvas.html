@@ -6,6 +6,7 @@
 function Info(){
     this.info = new Array;
 }
+
 Info.prototype.write = function(ctx, text){
     ctx.fillStyle = "rgba(255, 255, 255, 1)";
     ctx.fillRect(0, 0, 250, 25);
@@ -18,17 +19,12 @@ function CanvasState(canvas){
     this.ctx = canvas.getContext('2d');
     this.valid = true;
     var myState = this;  // use myState instead of this for the rest of this function...
-    myState.block = null;
+    myState.block = new Array();
     myState.info = new Info();
     myState.info.write(this.ctx,"Hello there");
         canvas.addEventListener('mousedown', function() {
-            /*
-            myState.ctx.fillStyle = "rgba(0, 0, 255, .5)";
-            myState.ctx.fillRect(0, 0, 300, 300); */
         }, true);
         canvas.addEventListener('mouseup', function() {
-           /* myState.ctx.fillStyle = "rgba(255, 255, 255, 1)";
-            myState.ctx.fillRect(0, 0, 300, 300);*/
         }, true);
         canvas.addEventListener('mousemove', function(e) {
             var mouse = myState.getMousePos(canvas,e);
@@ -37,12 +33,11 @@ function CanvasState(canvas){
         canvas.addEventListener('click', function(e) {
             var mouse = myState.getMousePos(canvas,e);
             myState.info.write(myState.ctx, "mouse click at " +  mouse.x + " " + mouse.y);
-            myState.block = new Block(mouse.x, mouse.y, 20, 20, "rgba(0, 0, 0, 1)");
+            myState.block[myState.block.length] = new Block(mouse.x, mouse.y, 20, 20, "rgba(0, 0, 0, 1)");
             myState.valid = false;
         }, true);
         // and call the function every few seconds
         setInterval(function() { myState.draw(); }, 30); // calls myState.draw() every 100 milliseconds
-
 }
 
 // after adding the block code we can see an interesting problem.... every time we move the mouse
@@ -52,10 +47,15 @@ CanvasState.prototype.draw = function ()
 {
     if (this.valid === false)
     {
-        this.block.draw(this.ctx);
+        this.ctx.clearRect(0,0,300,300);  // clears the canvas to the background colour
+        for (x=1; x < this.block.length; x++)
+        {
+            this.block[x].draw(this.ctx);
+        }
         this.valid = true;
     }
 }
+
 CanvasState.prototype.getMousePos = function(canvas,evt){
     var rect = canvas.getBoundingClientRect();
     var xm = evt.clientX - rect.left;
