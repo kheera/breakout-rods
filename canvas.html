@@ -9,31 +9,155 @@ function Info(){
 
 Info.prototype.write = function(ctx, text){
     ctx.fillStyle = "rgba(255, 255, 255, 1)";
-    ctx.fillRect(0, 0, 250, 25);
+    ctx.fillRect(0, 0, 600, 25);
     ctx.fillStyle = "blue";
     ctx.font = "bold 16px Arial";
     ctx.fillText(text, 20, 20);
+}
+
+function Grid(width, height, width_units, height_units)
+{
+    // I need to create a grid, each unit of the grid can hold one block.
+    // the block needs to know what colour it is and what the block id is.  two blocks of the same type adjecent to each other need to
+    // merge into one block.
+    // the grid needs to know if a block is in that grid location, what the block id is
+    // and if given an (x,y) coordinate is it in that grid location.  the grid needs to konw
+    // the grid data structure might look like this:
+    // each grid unit is a square so it's width and height match.  based on the grid id
+    // we should be able to calculate the location of the grid unit.  all grid units are 20pixels by 20 pixels.
+    // (1,1) - starts at pixel 0,0, contains block id 10.
+    // (1,2) - starts at pixel 0, (20*2), contains block id null.
+    // (5,5) - starts at pixel (20*5)(20*5), contains block id 3
+    // (5,6) - starts at pixel (20*5),(20*6), contains block id 3
+    
+    // how do I create the grid?
+    // first I need to know how much space we are working with, so pass in the width and height, then
+    // lets make life easy by asking the user to choose how many width_units they want
+    // and how many height_units they want... so we can calculate our unit size like this:
+    // grid_width_unit_size = width / width_units
+    // grid_height_unit_size = height / height_units
+    // now lets create an array and loop through it to initilize each value in the array
+
+    var grid = new Array(width_units);
+    var width_unit_size = width / width_units;
+    var height_unit_size = height / height_units;
+    for (var x = 0; x < width_units; x++)
+    {
+        grid[x] = new Array(height_units);
+        for (var y = 0; y< height_units; y++)
+        {
+            grid[x][y] = {block_id: null, x_left: (x*width_unit_size), y_top: (y*height_unit_size), selected: false}
+        }
+    }
+    this.grid = grid;
+    this.width_units = width_units;
+    this.height_units = height_units;
+    this.width_unit_size = width_unit_size;
+    this.height_unit_size = height_unit_size;
+    this.mouse_location = {x:-1,y:-1} // current grid number of the mouse pointer. (we'll use negative numbers to indicate we don't know where the mouse is)
+    this.last_mouse_location = {x:-1,y:-1} // used to determine if the mouse has moved into a new block or on the same block
+}
+
+Grid.prototype.draw = function(ctx)
+{
+    // this will just print a grid, paintstankingly, one block at a time.
+    // this is mostly a trouble shooting routine to check if our grid array
+    // is created correctly.
+    for (var x = 0; x < this.width_units; x++)
+    {
+        for (var y = 0; y < this.height_units; y++)
+        {
+            // lets just start by drawing a line around the grid unit
+            /*
+            ctx.beginPath();
+            ctx.moveTo(this.grid[x][y].x_left, this.grid[x][y].y_top);
+            ctx.lineTo(this.grid[x][y].x_left + this.width_unit_size, this.grid[x][y].y_top);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(this.grid[x][y].x_left, this.grid[x][y].y_top);
+            ctx.lineTo(this.grid[x][y].x_left, this.grid[x][y].y_top + this.height_unit_size);
+            ctx.stroke();
+            */
+            // now lets check to see if the mouse is over the current block and if it is
+            // lets give the block a light grey background
+            if ((x === this.mouse_location['x']) && (y === this.mouse_location['y']))
+            {
+                ctx.fillStyle = "rgba(245, 245, 245, 1)";
+                ctx.fillRect(this.grid[x][y].x_left, this.grid[x][y].y_top, this.width_unit_size, this.height_unit_size);
+            }
+            if (this.grid[x][y]['selected'] === true)
+            {
+                ctx.fillStyle = "rgba(50,50,50,1)";
+                ctx.fillRect(this.grid[x][y].x_left, this.grid[x][y].y_top, this.width_unit_size, this.height_unit_size);
+
+            }
+
+            
+        }
+    }
+}
+
+Grid.prototype.updateMousePosition = function(x,y)
+{
+    // one way to figure out where the mouse is would be to loop through every block in the grid
+    // and check to see if the point is within that grid location.
+    // using the above method would be quite time consuming and require more code than....
+    // another way to find the mouse is to calculate the position based on the size
+    // of the blocks.... so
+    // if we truncate x / width_unit_size we should be left with the x value of the current block
+    // if we truncate y / height_unit_size we should be left with the y value of the current block
+    this.mouse_location['x'] = Math.floor(x / this.width_unit_size);
+    this.mouse_location['y'] = Math.floor(y / this.height_unit_size);
+}
+
+Grid.prototype.selectCurrentBlock = function()
+{
+    this.grid[this.mouse_location['x']][this.mouse_location['y']]['selected'] = true;
+}
+
+Grid.prototype.toggleCurrentBlock = function()
+{
+    this.grid[this.mouse_location['x']][this.mouse_location['y']]['selected'] = !this.grid[this.mouse_location['x']][this.mouse_location['y']]['selected'];
 }
 
 function CanvasState(canvas){
     this.ctx = canvas.getContext('2d');
     this.valid = true;
     var myState = this;  // use myState instead of this for the rest of this function...
-    myState.block = new Array();
+    var mouseDown = false;
+    var drawing = false;
+    myState.grid = new Grid(600,300,30,15);
+ //   myState.block = new Array();
     myState.info = new Info();
-    myState.info.write(this.ctx,"Hello there");
         canvas.addEventListener('mousedown', function() {
+            mouseDown = true;
         }, true);
+        
         canvas.addEventListener('mouseup', function() {
+            mouseDown = false;
         }, true);
         canvas.addEventListener('mousemove', function(e) {
             var mouse = myState.getMousePos(canvas,e);
-            myState.info.write(myState.ctx, "Mouse Position: (x,y) " +  mouse.x + " " + mouse.y);
+            myState.grid.updateMousePosition(mouse.x, mouse.y);
+            if (mouseDown === true)
+            {
+                myState.grid.selectCurrentBlock();
+                drawing = true;
+                
+            }
+           // myState.info.write(myState.ctx, "Mouse Position: (x,y) " +  mouse.x + " " + mouse.y + ' block: ' + myState.grid.mouse_location['x'] + ',' + myState.grid.mouse_location['y']);
         }, true);
         canvas.addEventListener('click', function(e) {
             var mouse = myState.getMousePos(canvas,e);
-            myState.info.write(myState.ctx, "mouse click at " +  mouse.x + " " + mouse.y);
-            myState.block[myState.block.length] = new Block(mouse.x, mouse.y, 20, 20, "rgba(0, 0, 0, 1)");
+        //    myState.info.write(myState.ctx, "mouse click at " +  mouse.x + " " + mouse.y);
+       //     myState.block[myState.block.length] = new Block(mouse.x, mouse.y, 20, 20, "rgba(0, 0, 0, 1)");
+            if (drawing === true)
+            {
+                drawing = false; // no longer drawing
+            } else {
+                myState.grid.toggleCurrentBlock(); // the user wasn't drawing and wants to change the state of this block.
+
+            }
             myState.valid = false;
         }, true);
         // and call the function every few seconds
@@ -45,13 +169,15 @@ function CanvasState(canvas){
 // method and have it called automatically a bunch of times per second.
 CanvasState.prototype.draw = function ()
 {
-    if (this.valid === false)
+    //if (this.valid === false)
+    if (this.valid === this.valid)
     {
-        this.ctx.clearRect(0,0,300,300);  // clears the canvas to the background colour
-        for (x=1; x < this.block.length; x++)
+        this.ctx.clearRect(0,0,600,300);  // clears the canvas to the background colour
+        this.grid.draw(this.ctx);
+/*        for (x=1; x < this.block.length; x++)
         {
             this.block[x].draw(this.ctx);
-        }
+        }*/
         this.valid = true;
     }
 }
@@ -72,6 +198,7 @@ CanvasState.prototype.getMousePos = function(canvas,evt){
 function Block (x,y,width, height, colour) {
     // initialization code goes here.
     // TODO: Add verification to block constructor to make sure we have valid information for building our block with.
+   // alert(x + ',' + y);
     this.x = x;
     this.y = y;
     this.height = height;
@@ -100,6 +227,6 @@ canvas {border-style:solid;}
 </head>
 
 <body onload="init()">
-        <canvas tabindex=1 id="canvas1" width="300" height="300" fillStyle border-style></canvas>
+        <canvas tabindex=1 id="canvas1" width="600" height="300" fillStyle border-style></canvas>
     </body>
 </html>
