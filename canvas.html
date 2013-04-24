@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html><head>
+<html>
+<head>
 
 <script type="text/javascript">
 
@@ -15,6 +16,18 @@ Info.prototype.write = function(ctx, text){
     ctx.fillText(text, 20, 20);
 }
 
+function Block() {
+    var x;
+    var y;
+}
+
+// a collection of blocks
+function Rod(){
+    var x;
+    var y;
+    var length;
+    var orientation;  // horizontal or vertical?
+}
 function Grid(width, height, width_units, height_units)
 {
     // I need to create a grid, each unit of the grid can hold one block.
@@ -93,7 +106,7 @@ Grid.prototype.draw = function(ctx)
             // lets give the block a light grey background
             if ((x === this.mouse_location['x']) && (y === this.mouse_location['y']))
             {
-                ctx.fillStyle = "rgba(245, 245, 245, 1)";
+                ctx.fillStyle = "rgba(230, 230, 230, 1)";
                 ctx.fillRect(this.grid[x][y].x_left, this.grid[x][y].y_top, this.width_unit_size, this.height_unit_size);
             }
             if (this.grid[x][y]['selected'] === true)  // checks to see if the block is selected and if so gives it a darker colour
@@ -104,9 +117,9 @@ Grid.prototype.draw = function(ctx)
                     (this.grid[x][y]['block_start_y'] === y))
                 {
                     ctx.fillStyle = "rgba(100,100,100,1)";
-                    ctx.fillRect(this.grid[x][y].x_left, this.grid[x][y].y_top, this.width_unit_size, this.height_unit_size);
+                    ctx.fillRect(this.grid[x][y].x_left, this.grid[x][y].y_top, this.width_unit_size -1, this.height_unit_size -1);
                     ctx.lineWidth = 1;
-                    ctx.strokeRect(this.grid[x][y].x_left, this.grid[x][y].y_top, this.width_unit_size, this.height_unit_size);
+                    ctx.strokeRect(this.grid[x][y].x_left, this.grid[x][y].y_top, this.width_unit_size -1 , this.height_unit_size -1);
                 }
             }
         }
@@ -128,6 +141,7 @@ Grid.prototype.updateMousePosition = function(x,y)
 
 Grid.prototype.selectCurrentBlock = function()
 {
+    // this.grid[x][y] == true;
     this.grid[this.mouse_location['x']][this.mouse_location['y']]['selected'] = true;
 }
 
@@ -160,7 +174,7 @@ Grid.prototype.mergeBlocks = function()
     // A base 10 rod is a rod made up of any number of 10 or less blocks.
     // each rod is a different colour and the colour is based on the length.
     // when we are creating rods let's say they have to be created horizontally.
-    // fds
+    // 
     
 }
 
@@ -291,11 +305,11 @@ function init()
 </script>
 
 <style>
-canvas {border-style:solid;}
+    canvas {border-style:solid;}
 </style>    
 </head>
 
 <body onload="init()">
         <canvas tabindex=1 id="canvas1" width="600" height="300" fillStyle border-style></canvas>
-    </body>
+</body>
 </html>
