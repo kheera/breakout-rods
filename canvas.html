@@ -104,11 +104,33 @@ Grid.prototype.updateMousePosition = function(x,y)
     // using the above method would be quite time consuming and require more code than....
     // another way to find the mouse is to calculate the position based on the size
     // of the blocks.... so
-    // if we truncate x / width_unit_size we should be left with the x value of the current block
-    // if we truncate y / height_unit_size we should be left with the y value of the current block
+    // if we truncate (x / width_unit_size) we should be left with the x value of the current block
+    // if we truncate (y / height_unit_size) we should be left with the y value of the current block
     this.mouse_location['x'] = Math.floor(x / this.width_unit_size);
     this.mouse_location['y'] = Math.floor(y / this.height_unit_size);
 }
+
+Grid.prototype.moveMousePosition = function(keyCode)
+{
+	switch (keyCode)
+	{
+	case 39: // right arrow
+		this.mouse_location['x'] = this.mouse_location['x']+1;
+		break;
+		//alert(this.mouse_location['x']);
+	case 37: // left arrow
+		this.mouse_location['x'] = this.mouse_location['x']-1;
+		break;
+	case 40: // down arrow
+		this.mouse_location['y'] = this.mouse_location['y']+1;
+		break;
+	case 38: // up arrow
+		this.mouse_location['y'] = this.mouse_location['y']-1;
+		break;
+	}
+
+}
+
 
 Grid.prototype.selectCurrentBlock = function()
 {
@@ -117,7 +139,8 @@ Grid.prototype.selectCurrentBlock = function()
 
 Grid.prototype.toggleCurrentBlock = function()
 {
-    this.grid[this.mouse_location['x']][this.mouse_location['y']]['selected'] = !this.grid[this.mouse_location['x']][this.mouse_location['y']]['selected'];
+    this.grid[this.mouse_location['x']][this.mouse_location['y']]['selected'] = 
+		!this.grid[this.mouse_location['x']][this.mouse_location['y']]['selected'];
 }
 
 function CanvasState(canvas){
@@ -147,6 +170,27 @@ function CanvasState(canvas){
             }
            // myState.info.write(myState.ctx, "Mouse Position: (x,y) " +  mouse.x + " " + mouse.y + ' block: ' + myState.grid.mouse_location['x'] + ',' + myState.grid.mouse_location['y']);
         }, true);
+
+		canvas.addEventListener("keydown", function (e) {
+			// 39 - right arrow
+			// 37 - left arrow
+			// 40 - down arrow
+			// 38 - up arrow
+			//alert(e.keyCode);
+			var keypressed = parseInt(e.keyCode);
+
+			switch (keypressed)
+			{
+			case 39: // right arrow
+			case 37: // left arrow
+			case 40: // down arrow
+			case 38: // up arrow
+				myState.grid.moveMousePosition(keypressed);
+				break;
+			}
+			myState.grid.selectCurrentBlock();
+		}, true);
+
         canvas.addEventListener('click', function(e) {
             var mouse = myState.getMousePos(canvas,e);
         //    myState.info.write(myState.ctx, "mouse click at " +  mouse.x + " " + mouse.y);
