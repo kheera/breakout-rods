@@ -1,300 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="Rod.js"></script>
+<script type="text/javascript" src="Grid.js"></script>
+<script type="text/javascript" src="Info.js"></script>
 <script type="text/javascript">
-
-function Info(){
-    this.info = new Array;
-}
-
-Info.prototype.write = function(ctx, text){
-    ctx.fillStyle = "rgba(255, 255, 255, 1)";
-    ctx.fillRect(0, 0, 600, 25);
-    ctx.fillStyle = "blue";
-    ctx.font = "bold 16px Arial";
-    ctx.fillText(text, 20, 20);
-}
-
-function Block() {
-    var x;
-    var y;
-}
-
-// a collection of blocks
-function Rod(){
-    var x;
-    var y;
-    var length;
-    var orientation;  // horizontal or vertical?
-}
-function Grid(width, height, width_units, height_units)
-{
-    // I need to create a grid, each unit of the grid can hold one block.
-    // the block needs to know what colour it is and what the block id is.  two blocks of the same type adjecent to each other need to
-    // merge into one block.
-    // the grid needs to know if a block is in that grid location, what the block id is
-    // and if given an (x,y) coordinate is it in that grid location.  the grid needs to konw
-    // the grid data structure might look like this:
-    // each grid unit is a square so it's width and height match.  based on the grid id
-    // we should be able to calculate the location of the grid unit.  all grid units are 20pixels by 20 pixels.
-    // (1,1) - starts at pixel 0,0, contains block id 10.
-    // (1,2) - starts at pixel 0, (20*2), contains block id null.
-    // (5,5) - starts at pixel (20*5)(20*5), contains block id 3
-    // (5,6) - starts at pixel (20*5),(20*6), contains block id 3
-    
-    // how do I create the grid?
-    // first I need to know how much space we are working with, so pass in the width and height, then
-    // lets make life easy by asking the user to choose how many width_units they want
-    // and how many height_units they want... so we can calculate our unit size like this:
-    // grid_width_unit_size = width / width_units
-    // grid_height_unit_size = height / height_units
-    // now lets create an array and loop through it to initilize each value in the array
-
-    var grid = new Array(width_units);
-    var width_unit_size = width / width_units;
-    var height_unit_size = height / height_units;
-    for (var x = 0; x < width_units; x++)
-    {
-        grid[x] = new Array(height_units);
-        for (var y = 0; y< height_units; y++)
-        {
-            grid[x][y] =
-            {
-                block_id: null,
-                x_left: (x*width_unit_size),
-                y_top: (y*height_unit_size),
-                selected: false,
-                block_start_x: x,
-                block_start_y: y,
-                block_end_x: x,
-                block_end_y: y
-            }
-        }
-    }
-    this.grid = grid;
-    this.width_units = width_units;
-    this.height_units = height_units;
-    this.width_unit_size = width_unit_size;
-    this.height_unit_size = height_unit_size;
-    this.mouse_location = {x:-1,y:-1} // current grid number of the mouse pointer. (we'll use negative numbers to indicate we don't know where the mouse is)
-    this.last_mouse_location = {x:-1,y:-1} // used to determine if the mouse has moved into a new block or on the same block
-    
-}
-
-Grid.prototype.draw = function(ctx)
-{
-    // this will just print a grid, paintstankingly, one block at a time.
-    // this is mostly a trouble shooting routine to check if our grid array
-    // is created correctly.
-    for (var x = 0; x < this.width_units; x++)
-    {
-        for (var y = 0; y < this.height_units; y++)
-        {
-            // lets just start by drawing a line around the grid unit
-            /*
-            ctx.beginPath();
-            ctx.moveTo(this.grid[x][y].x_left, this.grid[x][y].y_top);
-            ctx.lineTo(this.grid[x][y].x_left + this.width_unit_size, this.grid[x][y].y_top);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(this.grid[x][y].x_left, this.grid[x][y].y_top);
-            ctx.lineTo(this.grid[x][y].x_left, this.grid[x][y].y_top + this.height_unit_size);
-            ctx.stroke();
-            */
-            // now lets check to see if the mouse is over the current block and if it is
-            // lets give the block a light grey background
-            if ((x === this.mouse_location['x']) && (y === this.mouse_location['y']))
-            {
-                ctx.fillStyle = "rgba(230, 230, 230, 1)";
-                ctx.fillRect(this.grid[x][y].x_left, this.grid[x][y].y_top, this.width_unit_size, this.height_unit_size);
-            }
-            if (this.grid[x][y]['selected'] === true)  // checks to see if the block is selected and if so gives it a darker colour
-            {
-                // but wait... now we want to add the ability to merg adjacent blocks.  so let's only
-                // display the block in this section if the block_start matches this position so....
-                if ((this.grid[x][y]['block_start_x'] === x) &&
-                    (this.grid[x][y]['block_start_y'] === y))
-                {
-                    ctx.fillStyle = "rgba(100,100,100,1)";
-                    ctx.fillRect(this.grid[x][y].x_left, this.grid[x][y].y_top, this.width_unit_size -1, this.height_unit_size -1);
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(this.grid[x][y].x_left, this.grid[x][y].y_top, this.width_unit_size -1 , this.height_unit_size -1);
-                }
-            }
-        }
-    }
-}
-
-Grid.prototype.updateMousePosition = function(x,y)
-{
-    // one way to figure out where the mouse is would be to loop through every block in the grid
-    // and check to see if the point is within that grid location.
-    // using the above method would be quite time consuming and require more code than....
-    // another way to find the mouse is to calculate the position based on the size
-    // of the blocks.... so
-    // if we truncate x / width_unit_size we should be left with the x value of the current block
-    // if we truncate y / height_unit_size we should be left with the y value of the current block
-    this.mouse_location['x'] = Math.floor(x / this.width_unit_size);
-    this.mouse_location['y'] = Math.floor(y / this.height_unit_size);
-}
-
-Grid.prototype.selectCurrentBlock = function()
-{
-    // this.grid[x][y] == true;
-    this.grid[this.mouse_location['x']][this.mouse_location['y']]['selected'] = true;
-}
-
-Grid.prototype.selectSelectionBlocks = function()
-{
-    // select all the blocks between
-    // this.startSelection.x,this.startSelection.y and this.endSelection.x,this.endSelection.y
-    // loop through x until x end
-    // loop through y until y end
-    // select each of the looped through blocks.
-    
-}
-
-Grid.prototype.selectBlocks = function()
-{
-    // put a border arond the blocks between this.startSelection.x,this.startSelection.y and this.endSelection.x,this.endSelection.y
-    
-}
-Grid.prototype.toggleCurrentBlock = function()
-{
-    this.grid[this.mouse_location['x']][this.mouse_location['y']]['selected'] = !this.grid[this.mouse_location['x']][this.mouse_location['y']]['selected'];
-}
-
-Grid.prototype.mergeBlocks = function()
-{
-    // this function merges blocks.
-    // how does it work? what blocks can be merged?  when do we know the user wants to merg blocks?
-    // how are merged blocks different from single blocks?
-    // what I'm trying to do here is turn blocks into base 10 rods.
-    // A base 10 rod is a rod made up of any number of 10 or less blocks.
-    // each rod is a different colour and the colour is based on the length.
-    // when we are creating rods let's say they have to be created horizontally.
-    // 
-    
-}
-
 function CanvasState(canvas){
+    //INIT SOME VARS
     this.ctx = canvas.getContext('2d');
     this.valid = true;
+    this.width = 600;
+    this.height = 400;
+    this.mouseDown = false;
+    this.mousePos = 0;
+    this.grid = new Grid();
+    this.grid.new(this.height/20,this.width/20,this.height/20);
     var myState = this;  // use myState instead of this for the rest of this function...
-    var mouseDown = false;
-    var drawing = false;
-    var selecting = false;
-    this.startSelection = {x:-1,y:-1}
-    this.endSelection = {x:-1,y:-1}
-    myState.grid = new Grid(600,300,30,15);
- //   myState.block = new Array();
     myState.info = new Info();
-        canvas.addEventListener('keydown', function(e) {
-         //   alert(e.keyCode); // control is keycode 17
-         if (e.keyCode === 17)
-         {
-            selecting = true;
-            this.startSelection.x = myState.grid.mouse_location.x
-            this.startSelection.y = myState.grid.mouse_location.y
-         }
-        }, true);
-        canvas.addEventListener('keyup', function(e) {
-         //   alert(e.keyCode); // control is keycode 17
-         if (e.keyCode === 17)
-         {
-            this.endSelection.x = myState.grid.mouse_location.x
-            this.endSelection.y = myState.grid.mouse_location.y
-            
-         }
-        }, true);
-        
-        canvas.addEventListener('mousedown', function() {
-            mouseDown = true;
-        }, true);
-        canvas.addEventListener('mouseup', function() {
-            mouseDown = false;
-        }, true);
-        canvas.addEventListener('mousemove', function(e) {
-            var mouse = myState.getMousePos(canvas,e);
-            myState.grid.updateMousePosition(mouse.x, mouse.y);
-            if (mouseDown === true)
-            {
-                myState.grid.selectCurrentBlock();
-                drawing = true;
-                
-            }
-            if (merging === true)
-            {
-                myState.grid.mergeBlocks();
-            }
-           // myState.info.write(myState.ctx, "Mouse Position: (x,y) " +  mouse.x + " " + mouse.y + ' block: ' + myState.grid.mouse_location['x'] + ',' + myState.grid.mouse_location['y']);
-        }, true);
-        canvas.addEventListener('click', function(e) {
-            var mouse = myState.getMousePos(canvas,e);
-        //    myState.info.write(myState.ctx, "mouse click at " +  mouse.x + " " + mouse.y);
-       //     myState.block[myState.block.length] = new Block(mouse.x, mouse.y, 20, 20, "rgba(0, 0, 0, 1)");
-            if (drawing === true)
-            {
-                drawing = false; // no longer drawing
-            } else {
-                myState.grid.toggleCurrentBlock(); // the user wasn't drawing and wants to change the state of this block.
-
-            }
-            myState.valid = false;
-        }, true);
-        // and call the function every few seconds
-        setInterval(function() { myState.draw(); }, 30); // calls myState.draw() every 100 milliseconds
+    //SETUP OUR EVENT LISTENERS
+    canvas.addEventListener('mousedown', function() {
+        mouseDown = true;
+    }, true);
+    canvas.addEventListener('mouseup', function() {
+        mouseDown = false;
+    }, true);
+    canvas.addEventListener('mousemove', function(e) {
+        myState.mousePos = myState.getMousePos(canvas,e);
+    }, true);
+    // and call the function every few seconds
+    setInterval(function() { myState.draw(); }, 30); // calls myState.draw() every 100 milliseconds
 }
-
-// after adding the block code we can see an interesting problem.... every time we move the mouse
-// the the block disappears!  TO fix this we're going to put all our redrawing code into a canvas.draw()
-// method and have it called automatically a bunch of times per second.
 CanvasState.prototype.draw = function ()
 {
-    //if (this.valid === false)
-    if (this.valid === this.valid)
-    {
-        this.ctx.clearRect(0,0,600,300);  // clears the canvas to the background colour
+        this.ctx.clearRect(0,0,this.width,this.height);  // clears the canvas to the background colour
+        this.info.write(this.ctx, "mouse pos: " + this.mousePos.x + ',' + this.mousePos.y);
         this.grid.draw(this.ctx);
-/*        for (x=1; x < this.block.length; x++)
-        {
-            this.block[x].draw(this.ctx);
-        }*/
+        this.grid.drawBlockByMousePos(this.ctx, this.mousePos);
+        //this.grid.drawRodByMousePos(this.ctx, this.mousePos)
         this.valid = true;
-    }
 }
-
 CanvasState.prototype.getMousePos = function(canvas,evt){
     var rect = canvas.getBoundingClientRect();
-    var xm = evt.clientX - rect.left;
-    var ym = evt.clientY - rect.top;
+    
+    var xm = evt.clientX - rect.left - 2;  // THE 2 IS FOR THE BORDER OF THE CANVAS OBJECT
+    var ym = evt.clientY - rect.top - 2;
     return {
-        x: xm,
-        y: ym
+        x: Math.round(xm),
+        y: Math.round(ym)
     };  
-}
-	
-// Block constructor.
-// (x,y) coordinates refer to the top left corner of the block.
-// colour should be valid rgb colour code
-function Block (x,y,width, height, colour) {
-    // initialization code goes here.
-    // TODO: Add verification to block constructor to make sure we have valid information for building our block with.
-   // alert(x + ',' + y);
-    this.x = x;
-    this.y = y;
-    this.height = height;
-    this.width = width;
-    this.colour = colour;
-}
-
-Block.prototype.draw = function(ctx){
-    // the code that draws the block goes in here.
-    // we need to define a rectangle and draw it
-    ctx.fillStyle = this.colour;
-    ctx.fillRect(this.x, this.y, this.width, this.height);
-  //  alert(this.x);
 }
 
 function init()
@@ -305,11 +61,14 @@ function init()
 </script>
 
 <style>
-    canvas {border-style:solid;}
+    canvas {border-style:solid; border-width:2px;}
 </style>    
 </head>
 
 <body onload="init()">
-        <canvas tabindex=1 id="canvas1" width="600" height="300" fillStyle border-style></canvas>
+    <div style="width:800px; display:block; margin-left:auto; margin-right:auto; text-align:center; top:10px;">
+        <h1>Breakout Rods!</h1>
+        <canvas tabindex=1 id="canvas1" width="600" height="400"></canvas>
+    </div>
 </body>
 </html>

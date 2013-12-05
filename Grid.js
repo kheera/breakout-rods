@@ -5,6 +5,15 @@ function Grid(){
     this.gridRows;
 }
 
+Grid.prototype.test = function(widthBlockPx,heightBlockPx)
+{
+    return (widthBlockPx-heightBlockPx);
+}
+Grid.prototype.calculateBlockSize = function(numUnits, pxArea)
+{
+    return (pxArea/numUnits);
+}
+
 // rows
 // columns
 Grid.prototype.new = function(horizontal,vertical,blockSizePx)
@@ -107,6 +116,32 @@ Grid.prototype.getBlock = function(horizontal,vertical)
         }
     return false;
     }
+}
+Grid.prototype.draw = function(ctx)
+{
+    for (row = 0; row < this.row; row++)
+    {  
+        ctx.beginPath();
+        ctx.moveTo(0,row*this.blockSizePx);
+        ctx.lineTo(this.column*this.blockSizePx,row*this.blockSizePx);
+        ctx.closePath();  
+        ctx.stroke();  
+    }
+    for (column = 0; column < this.column; column++)
+    {  
+        ctx.beginPath();
+        ctx.moveTo(column*this.blockSizePx,0);
+        ctx.lineTo(column*this.blockSizePx,this.row*this.blockSizePx);
+        ctx.closePath();  
+        ctx.stroke();  
+    }
+}
+
+Grid.prototype.drawBlockByMousePos = function(ctx, mousePos)
+{
+    var block;
+    block = (this.getBlockByPx(mousePos.x, mousePos.y));
+    
 }
 
 Grid.prototype.getBlockByPx = function(pxRow,pxColumn)

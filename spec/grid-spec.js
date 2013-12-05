@@ -40,6 +40,49 @@ describe("grid create", function() {
         expect(grid.gridRows.length).toBe(1);
         expect(grid.gridRows[0].length).toBe(5);
     });
+
+});
+
+describe("grid test", function() {
+   it("tests if block would be square.  returns 0 for square", function() {
+        var grid;
+        grid = new Grid();
+        var ret,widthBLockPx,heightBlockPx;
+        widthBlockPx = grid.calculateBlockSize(10,600);
+        heightBlockPx = grid.calculateBlockSize(10,400);
+        ret = grid.test(widthBlockPx,heightBlockPx);
+        // results are:
+        expect(ret).toBe(0);
+   });
+   it("tests if block would be square.  returns a positive number for width is greater than height", function() {
+        var grid;
+        grid = new Grid();
+        var ret,widthBLockPx,heightBlockPx;
+        widthBlockPx = grid.calculateBlockSize(10,600);
+        heightBlockPx = grid.calculateBlockSize(10,400);
+        ret = grid.test(widthBlockPx,heightBlockPx);
+        expect(ret).not.toBeLessThan(0);
+   });
+   it("tests if block would be square.  returns a negative number for height is greater than width", function() {
+        var grid;
+        grid = new Grid();
+        var ret,widthBLockPx,heightBlockPx;
+        widthBlockPx = grid.calculateBlockSize(10,600);
+        heightBlockPx = grid.calculateBlockSize(10,400);
+        ret = grid.test(widthBlockPx,heightBlockPx);
+        expect(ret).toBeLessThan(0);
+   });
+});
+
+describe("calculate block size", function() {
+   it("returns a block size given a requested number of units and a canvas length or width in pixels", function() {
+        var grid;
+        grid = new Grid();
+        var ret;
+        // should return 400 / 10 = 40
+        ret = grid.calculateBlockSize(10,400);
+        expect(ret).toBe(40);
+   });
 });
 
 describe("add rod to grid", function () {
@@ -248,6 +291,18 @@ describe("grid info", function () {
     });
     it("can tell us if pixel (x,y) coordinates are on the grid, if yes returns the block coordinates (horiziontal,vertical).", function() {
         expect(grid.getBlockByPx(-1,0)).toBe(false);
+    });
+});
+
+describe("grid draw", function (){
+    it("can draw the block when giving pixel locations", function() {
+        expect(1).toBe(2);
+    });
+    it("can draw the rod when given pixel locations", function() {
+        expect(1).toBe(2); 
+    });
+    it("can draw the entire grid", function() {
+        expect(1).toBe("2");
     });
 });
 
