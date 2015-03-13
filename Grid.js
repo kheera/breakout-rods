@@ -1,7 +1,7 @@
 function Grid(){
     this.rows = 0;
     this.cols = 0;
-    this.gridLength = this.rows*this.cols;
+    this.gridLength = 0;
     this.grid = [];
     this.blockSizePx = 20;
 }
@@ -24,7 +24,7 @@ Grid.prototype.new = function(rows,cols)
 
     this.rows = rows;
     this.cols = cols;
-    this.gridLength = this.rows * this.cols;
+    this.gridLength = (this.rows+1) * (this.cols+1);
     for (var i = 0; i < this.gridLength; i++) {
         this.grid[i] = 0;
     };
@@ -87,17 +87,14 @@ Grid.prototype.removeRod = function(rod)
 
 Grid.prototype.draw = function(ctx) {
 //    this.info.write(ctx, "......: " + this.mousePos.x + ',' + this.mousePos.y);
-    this.drawGridLines(ctx);
+//    ctx.fillRect(0, 0, 600, 25);
     ctx.fillStyle = "rgba(255, 255, 255, 1)";
-    ctx.fillRect(0, 0, 600, 25);
     ctx.fillStyle = "blue";
     ctx.font = "bold 16px Arial";
     for (var i = 0; i < this.grid.length; i++) {
-        //fillText(x,y) ; x==col, y==row
         ctx.fillText(this.grid[i], 0 + 20 * (i - (Math.floor(i/this.cols)*this.cols)), 0+20*Math.floor(i/this.cols));
-        //ctx.fillText(this.grid[i], 20+20*Math.floor(i/this.cols), 20 + 20 * (i - (Math.floor(i/this.cols)*this.cols)));
-        //console.log(Math.floor(i/this.cols))    ;
     };
+    this.drawGridLines(ctx);
 };
 // cols = x
 // rows = y
@@ -110,9 +107,12 @@ Grid.prototype.draw = function(ctx) {
 
 Grid.prototype.drawGridLines = function(ctx)
 {
+
     //console.log(this.blockSizePx);
+    ctx.strokeStyle="#000000";
     for (row = 0; row < this.rows; row++)
     {  
+        //console.log(row);
         ctx.beginPath();
         ctx.moveTo(0,row*this.blockSizePx);
         ctx.lineTo(this.cols*this.blockSizePx,row*this.blockSizePx);
