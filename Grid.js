@@ -92,7 +92,7 @@ Grid.prototype.draw = function(ctx) {
     ctx.fillStyle = "blue";
     ctx.font = "bold 16px Arial";
     for (var i = 0; i < this.grid.length; i++) {
-        ctx.fillText(this.grid[i], 0 + 20 * (i - (Math.floor(i/this.cols)*this.cols)), 0+20*Math.floor(i/this.cols));
+        ctx.fillText(this.grid[i], 0 + 20 * (i - (Math.floor(i/this.cols)*this.cols)), 0+20*Math.floor(1+i/this.cols));
     };
     this.drawGridLines(ctx);
 };

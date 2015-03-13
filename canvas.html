@@ -30,7 +30,9 @@ function CanvasState(canvas){
         var rod;
         rod = new Rod(3);
         that.rods.push(rod);
-        result = that.grid.placeRod(rod,Math.round(that.mousePos.x/20),Math.round(that.mousePos.y/20));
+        console.log(that.mousePos.x + ' ' + that.mousePos.y);
+        console.log(Math.floor(that.mousePos.x/20) + ' ' + Math.floor(that.mousePos.y/20) + 1);
+        result = that.grid.placeRod(rod,Math.floor(that.mousePos.x/that.grid.blockSizePx),Math.floor(that.mousePos.y/that.grid.blockSizePx));
         //that.grid.drawBlockByMousePos(that.ctx,that.mousePos);
         console.log(that.rods.length);
         console.log(result);
