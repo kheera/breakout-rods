@@ -1,9 +1,14 @@
 
-function Rod(){
-    this.length;
-    this.orientation;
-    this.colour;
-    this.inUse;
+function Rod(l){
+    if (isNaN(l)) { throw "error: l must be a number"; }
+    if (l <= 0) { throw "error: l must be <= 0"; }
+    if (l > 10) { throw "error: l must be > 10"; }
+
+    this.length = l;
+    this.orientation = 'horizontal';
+    this.inUse = false;
+
+    // todo: color defs should not be part of this obj
     this.pollock_colours = new Array();
     this.pollock_colours[1] = 'rgba(255,255,255,1)'; // white
     this.pollock_colours[2] = 'rgba(255,192,203,1)'; // pink
@@ -16,19 +21,12 @@ function Rod(){
     this.pollock_colours[9] = 'rgba(65,105,225,1)'; //royal-blue";
     this.pollock_colours[10] = 'rgba(255,165,0,1)'; //orange";
     this.pollock_colours[11] = 'rgba(169,169,169,1)'; //dark-grey"
-}
-Rod.prototype.new = function(l)
-{
-    if (isNaN(l) == true) { return false; }
-    if (l <= 0) { return false; }
-    if (l > 10) { return false; }
-   
-    this.inUse = false;
-    this.orientation = 'horizontal';
-    this.length = l
     this.colour = this.pollock_colours[l];
-    return true;
-}   
+}
+
+Rod.prototype.toString = function rodToString() {
+    return ("1");
+}  
 Rod.prototype.used = function()
 {
     this.inUse = true;

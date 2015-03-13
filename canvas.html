@@ -10,22 +10,38 @@
 <script type="text/javascript">
 function CanvasState(canvas){
     //INIT SOME VARS
+    var x=0;
+    var that = this;
     this.ctx = canvas.getContext('2d');
     this.valid = true;
     this.width = 600;
     this.height = 400;
     this.mouseDown = false;
     this.mousePos = 0;
+    this.mouseClicks = 1;
+    this.rods = [];
     this.grid = new Grid();
     this.grid.new(this.height/20,this.width/20,this.height/20);
     var myState = this;  // use myState instead of this for the rest of this function...
     myState.info = new Info();
     //SETUP OUR EVENT LISTENERS
     canvas.addEventListener('mousedown', function() {
-        mouseDown = true;
+        var result;
+        var rod;
+        rod = new Rod(3);
+        that.rods.push(rod);
+        result = that.grid.placeRod(rod,Math.round(that.mousePos.x/20),Math.round(that.mousePos.y/20));
+        //that.grid.drawBlockByMousePos(that.ctx,that.mousePos);
+        console.log(that.rods.length);
+        console.log(result);
+        that.mouseDown = true;
+        x++;
+        that.mouseClicks++;
+        console.log('hi' +x + that.mouseClicks);
+        console.log(that.rods);
     }, true);
     canvas.addEventListener('mouseup', function() {
-        mouseDown = false;
+        that.mouseDown = false;
     }, true);
     canvas.addEventListener('mousemove', function(e) {
         myState.mousePos = myState.getMousePos(canvas,e);
@@ -36,9 +52,9 @@ function CanvasState(canvas){
 CanvasState.prototype.draw = function ()
 {
         this.ctx.clearRect(0,0,this.width,this.height);  // clears the canvas to the background colour
-        this.info.write(this.ctx, "mouse pos: " + this.mousePos.x + ',' + this.mousePos.y);
         this.grid.draw(this.ctx);
-        this.grid.drawBlockByMousePos(this.ctx, this.mousePos);
+//        this.info.write(this.ctx, "mouse pos: " + Math.round(this.mousePos.x/20) + ',' + Math.round(this.mousePos.y/20));
+        //this.grid.drawBlockByMousePos(this.ctx, this.mousePos);
         //this.grid.drawRodByMousePos(this.ctx, this.mousePos)
         this.valid = true;
 }
