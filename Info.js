@@ -1,3 +1,4 @@
+/** Author: Shane Nelson **/
 function Info(){
     this.info = new Array;
 }
